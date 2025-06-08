@@ -1,4 +1,4 @@
-javascript:
+	javascript:
     //mass scavenging by Sophie "Shinko to Kuma"
 
     //relocate to mass scavenging page
@@ -9,7 +9,6 @@ javascript:
     $("#massScavengeSophie").remove();
     //set global variables
 	var troopTypeEnabled = get_troopTypesEnabled_from_storage();
-    var unitPriorities = get_unitPriorities_from_storage();
     
     if (game_data.player.sitter > 0) {
         URLReq = `game.php?t=${game_data.player.id}&screen=place&mode=scavenge_mass`;
@@ -92,25 +91,6 @@ javascript:
 		}
 		return enabled_troops;
 	}
-    function get_unitPriorities_from_storage() {
-        var priorities = {};
-        if (localStorage.getItem("massScavengingPriorities") == null) {
-            // Default: order as in worldUnits
-            for (var x = 0; x < game_data.units.length; x++) {
-                if (game_data.units[x] == "militia" || game_data.units[x] == "snob" || game_data.units[x] == "ram" || game_data.units[x] == "catapult" || game_data.units[x] == "spy") continue;
-                priorities[game_data.units[x]] = x + 1;
-            }
-            localStorage.setItem("massScavengingPriorities", JSON.stringify(priorities));
-        } else {
-            priorities = JSON.parse(localStorage.getItem("massScavengingPriorities"));
-        }
-        return priorities;
-    }
-
-    function save_unitPriorities_to_storage() {
-        localStorage.setItem("massScavengingPriorities", JSON.stringify(unitPriorities));
-    }
-
     function getData() {
         $("#massScavengeSophie").remove();
         URLs = [];
@@ -288,27 +268,8 @@ javascript:
 		`);
         $("#checkboxRow").eq(0).append(`<td align="center" style="background-color:${backgroundColor}"><input class = "unit_checker" type="checkbox" ID="${localUnitNames[i]}" name="${localUnitNames[i]}"></td>
 		`);
-		let unit = localUnitNames[i];
-        let priorityOptions = '';
-        for (let p = 1; p <= 8; p++) {
-            priorityOptions += `<option value="${p}" ${unitPriorities[unit] == p ? 'selected' : ''}>${p}</option>`;
-        }
-        $("#priorityRow").eq(0).append(
-            `<td align="center" style="background-color:${backgroundColor};vertical-align:top;">
-                <select class="unit_priority_selector" id="priority_${unit}" style="width:40px;">
-                    ${priorityOptions}
-                </select>
-            </td>`
-        );
-	}
-	enableCorrectTroopTypes();
-	// Listen for priority changes
-	$(".unit_priority_selector").change(function() {
-		let unit = $(this).attr("id").replace("priority_", "");
-		let val = parseInt($(this).val());
-		unitPriorities[unit] = val;
-		save_unitPriorities_to_storage();
-	});
+		enableCorrectTroopTypes();
+    }
 	$(".unit_checker").change(function(){
 		change_storage_keys($(this).attr("id"), $(this).prop("checked"));
 	});
@@ -330,13 +291,6 @@ javascript:
         enabledCategories.push($("#category3").is(":checked"));
         enabledCategories.push($("#category4").is(":checked"));
         time=$("#runTime")[0].value;
-        // Save priorities before sending
-        for (var i = 0; i < localUnitNames.length; i++) {
-            let unit = localUnitNames[i];
-            let val = parseInt($(`#priority_${unit}`).val());
-            unitPriorities[unit] = val;
-        }
-        save_unitPriorities_to_storage();
         getData();
     }
 
